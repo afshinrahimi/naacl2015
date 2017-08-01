@@ -129,7 +129,7 @@ def parse_args(argv):
     args = parser.parse_args(argv)
     return args
 if __name__ == '__main__':
-    #nice -n 10 python loc2lang.py -d ~/datasets/cmu/processed_data/ -enc latin1 -reg 0 -drop 0.0 -mindf 10 -hid 500 -ncomp 500 -autoencoder 500 
+    #THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/cmu/processed_data/ -enc latin1 -reg 1e-5 -drop 0.5 -mindf 10 -hid 800 -batch 500
     args = parse_args(sys.argv[1:])
     datadir = args.dir
     dataset_name = datadir.split('/')[-3]
