@@ -11,6 +11,7 @@ import random
 from haversine import haversine
 from data import DataLoader
 import mlp
+from sklearn.linear_model import SGDClassifier
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 np.random.seed(77)
@@ -45,11 +46,13 @@ def load_data(args):
     #remove @-mentions
     #token_pattern = r'(?u)(?<![@])\b\w+\b'
     #keep both @-mentions and hashtags with their signs
-    token_pattern = r'(?u)@?#?\b\w\w+\b'
+    #token_pattern = r'(?u)@?#?\b\w\w+\b'
+    #default sklearn token_pattern
+    token_pattern = r'(?u)\b\w\w+\b'
     dtype = 'float32'
     dl = DataLoader(data_home=args.dir, bucket_size=args.bucket, encoding=args.enc, 
                     celebrity_threshold=args.celebrity, one_hot_labels=False, 
-                    mindf=args.mindf, maxdf=0.1, norm='l2', idf=True, btf=True, tokenizer=None, subtf=True, stops='english', token_pattern=token_pattern)
+                    mindf=args.mindf, maxdf=0.2, norm='l2', idf=True, btf=True, tokenizer=None, subtf=True, stops='english', token_pattern=token_pattern)
     dl.load_data()
     #uncomment if you want to draw the training points on a map using basemap
     #dataset_name = args.dir.split('/')[-3]
@@ -95,14 +98,25 @@ def load_data(args):
 def train(data, args):
 
     X_train, Y_train, X_dev, Y_dev, X_test, Y_test, U_train, U_dev, U_test, classLatMedian, classLonMedian, userLocation = data
-    classifier = mlp.MLP(n_epochs=args.epochs, batch_size=args.batch, complete_prob=False, add_hidden=True, 
-                         regul_coef=args.reg, save_results=False, hidden_layer_size=args.hid, 
-                         drop_out_coef=args.drop, early_stopping_max_down=5)
-    classifier.fit(X_train, Y_train, X_dev, Y_dev)
+    if args.model == 'mlp':
+        classifier = mlp.MLP(n_epochs=args.epochs, batch_size=args.batch, complete_prob=False, add_hidden=True, 
+                             regul_coef=args.reg, save_results=False, hidden_layer_size=args.hid, 
+                             drop_out_coef=args.drop, early_stopping_max_down=5)
+        classifier.fit(X_train, Y_train, X_dev, Y_dev)
+        y_pred_dev = classifier.f_predict(X_dev)
+        y_pred_test = classifier.f_predict(X_test)
+    elif args.model == 'lr':
+        classifier = SGDClassifier(loss='log', penalty='elasticnet', alpha=args.reg, n_iter=5, l1_ratio=0.9, n_jobs=5, random_state=77)
+        classifier.fit(X_train, Y_train)
+        y_pred_dev = classifier.predict(X_dev)
+        y_pred_test = classifier.predict(X_test)
+    else:
+        logging.info('model should be either lr or mlp, current model is {}'.format(args.model))
+    
     logging.info('dev results')
-    mean, median, acc_at_161 = geo_eval(Y_dev, classifier.f_predict(X_dev), U_dev, classLatMedian, classLonMedian, userLocation)
+    mean, median, acc_at_161 = geo_eval(Y_dev, y_pred_dev, U_dev, classLatMedian, classLonMedian, userLocation)
     logging.info('test results')
-    mean, median, acc_at_161 = geo_eval(Y_test, classifier.f_predict(X_test), U_test, classLatMedian, classLonMedian, userLocation)
+    mean, median, acc_at_161 = geo_eval(Y_test, y_pred_test, U_test, classLatMedian, classLonMedian, userLocation)
     
 
 def parse_args(argv):
@@ -124,6 +138,7 @@ def parse_args(argv):
     parser.add_argument('-reg', metavar='float', help='regularization coefficient)', type=float, default=1e-6)
     parser.add_argument('-drop', metavar='float', help='dropout coef default 0.5', type=float, default=0.5)
     parser.add_argument('-tune', action='store_true', help='if exists tune hyperparameters')
+    parser.add_argument('-model', metavar='str', help='classifier either lr or mlp', default='lr')
     parser.add_argument('-m', '--message', type=str) 
     
     args = parser.parse_args(argv)
@@ -132,7 +147,5 @@ if __name__ == '__main__':
     #THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/cmu/processed_data/ -enc latin1 -reg 1e-5 -drop 0.5 -mindf 10 -hid 800 -batch 500
     args = parse_args(sys.argv[1:])
     datadir = args.dir
-    dataset_name = datadir.split('/')[-3]
-    logging.info('dataset: %s' % dataset_name)
     data = load_data(args)
     train(data, args)
