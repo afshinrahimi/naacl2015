@@ -10,9 +10,9 @@ Note that you should have three gzipped files in each dataset (user_info.train.g
 To run the LR model use:
 
 ```
-nice -n 10 python textclassification.py -dir ~/datasets/cmu/     -enc latin1 -reg 5e-5  -mindf 10  -model lr
-nice -n 10 python textclassification.py -dir ~/datasets/na/      -enc utf-8  -reg 1e-6  -mindf 10  -model lr
-nice -n 10 python textclassification.py -dir ~/datasets/world/    -enc utf-8 -reg 1e-6  -mindf 10  -model lr
+nice -n 10 python textclassification.py -dir ~/datasets/cmu/     -enc latin1 -reg 5e-5  -mindf 10 -bucket 300  -model lr
+nice -n 10 python textclassification.py -dir ~/datasets/na/      -enc utf-8  -reg 1e-6  -mindf 10 -bucket 2400 -model lr
+nice -n 10 python textclassification.py -dir ~/datasets/world/    -enc utf-8 -reg 1e-6  -mindf 10 -bucket 2400 -model lr
 
 ```
 
@@ -48,11 +48,11 @@ The MLP module is implemented in ``Theano`` and so the use of GPU should
 be controlled by ``THEANO_FLAGS='device=cuda0'``. A sample command would be:
 
 ```
-THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/cmu/    -enc latin1 -reg 5e-5 -drop 0.5 -mindf 10 -hid 1000 -batch 200  -model mlp
+THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/cmu/    -enc latin1 -reg 5e-5 -drop 0.5 -mindf 10 -bucket 300  -hid 1000 -batch 200  -model mlp
 
-THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/na/     -enc utf-8  -reg 1e-6 -drop 0.5 -mindf 10 -hid 2000 -batch 5000 -model mlp
+THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/na/     -enc utf-8  -reg 1e-6 -drop 0.5 -mindf 10 -bucket 2400 -hid 2000 -batch 5000 -model mlp
 
-THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/world/  -enc utf-8  -reg 1e-6 -drop 0.5 -mindf 10 -hid 3000 -batch 5000 -model mlp
+THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/world/  -enc utf-8  -reg 1e-6 -drop 0.5 -mindf 10 -bucket 2400 -hid 3000 -batch 5000 -model mlp
 ```
 
 
