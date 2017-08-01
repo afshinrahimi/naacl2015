@@ -37,9 +37,17 @@ of ``-model lr`` for logistic regression but then extra parameters such as batch
 hidden layer size and regularization coefficients should be tuned.
 
 I'd set the dropout to 0.5 and hidden size to 1000 for cmu, 2000 for na and 3000 for world
-and then tune the regularization coefficient.
+and then tune the regularization coefficient. For batch size I'd set cmu to 200 and others to
+few thousands (e.g. 5000). It's always possible to get better results
+with tuning all these parameters but that might be just overfiting to these datasets and
+settings rather than getting a generalized geolocation model.
 
+The MLP module is implemented in ``Theano`` and so the use of GPU should
+be controlled by ``THEANO_FLAGS='device=cuda0'``. A sample command would be:
 
+```
+THEANO_FLAGS='device=cuda0' nice -n 10 python textclassification.py -dir ~/datasets/cmu/ -enc latin1 -reg 5e-5 -drop 0.5 -mindf 10 -hid 1000 -batch 200 -model mlp
+```
 
 
 
