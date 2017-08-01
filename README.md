@@ -70,17 +70,26 @@ Usage
 
 
 ```
-usage: geodare.py [-h] [-dataset str] [-model str] [-datadir DATADIR] [-tune]
+usage: textclassification.py [-h] [-bucket int] [-batch int] [-celebrity int]
+                             [-epochs int] [-hid int] [-mindf int] [-dir str]
+                             [-enc str] [-reg float] [-drop float] [-tune]
+                             [-model str] [-m MESSAGE]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -dataset str, --dataset str
-                        dataset name (cmu, na, world)
-  -model str, --model str
-                        dialectology model (mlp, lr, word2vec)
-  -datadir DATADIR      directory where input datasets (cmu.pkl, na.pkl,
-                        world.pkl) are located.
-  -tune                 if true, tune the hyper-parameters.
+  -bucket int           discretisation bucket size
+  -batch int            SGD batch size
+  -celebrity int        minimum threshold for celebrities
+  -epochs int           max epochs for training
+  -hid int              Hidden layer size
+  -mindf int            minimum document frequency in BoW
+  -dir str              dataset directory containing (user_info.train.gz, user_info.dev.gz, user_info.test.gz)
+  -enc str              Data Encoding (e.g. latin1, utf-8)
+  -reg float            regularization coefficient)
+  -drop float           dropout coef default 0.5
+  -tune                 if exists tune hyperparameters
+  -model str            classifier either lr or mlp
+
 ```
 
 The preprocessed pickle files (e.g. na.pkl) are the vectorized version of
