@@ -12,7 +12,7 @@ To run the LR model use:
 ```
 nice -n 10 python textclassification.py -dir ~/datasets/cmu/     -enc latin1 -reg 5e-5  -mindf 10 -bucket 300  -model lr
 nice -n 10 python textclassification.py -dir ~/datasets/na/      -enc utf-8  -reg 1e-6  -mindf 10 -bucket 2400 -model lr
-nice -n 10 python textclassification.py -dir ~/datasets/world/    -enc utf-8 -reg 1e-6  -mindf 10 -bucket 2400 -model lr
+nice -n 10 python textclassification.py -dir ~/datasets/world/    -enc utf-8 -reg 5e-7  -mindf 10 -bucket 2400 -model lr
 
 ```
 
